@@ -826,13 +826,24 @@ class RouteAPI : public BaseAPI
                 if (requested_annotations & RouteParameters::AnnotationsType::Nodes)
                 {
                     util::json::Array nodes;
+                    util::json::Array latitudes;
+                    util::json::Array longitudes;
                     nodes.values.reserve(leg_geometry.node_ids.size());
+                    latitudes.values.reserve(leg_geometry.node_ids.size());
+                    longitudes.values.reserve(leg_geometry.node_ids.size());
                     for (const auto node_id : leg_geometry.node_ids)
                     {
                         nodes.values.push_back(
                             static_cast<std::uint64_t>(facade.GetOSMNodeIDOfNode(node_id)));
+                        auto node_coordinate = facade.GetCoordinateOfNode(node_id);
+                        latitudes.values.push_back(
+                            static_cast<double>(util::toFloating(node_coordinate.lat)));
+                        longitudes.values.push_back(
+                            static_cast<double>(util::toFloating(node_coordinate.lon)));
                     }
                     annotation.values["nodes"] = std::move(nodes);
+                    annotation.values["latitudes"] = std::move(latitudes);
+                    annotation.values["longitudes"] = std::move(longitudes);
                 }
                 // Add any supporting metadata, if needed
                 if (requested_annotations & RouteParameters::AnnotationsType::Datasources)
